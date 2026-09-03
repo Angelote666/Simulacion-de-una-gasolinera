@@ -1,1 +1,1 @@
-Programa de simulación del sistema de una gasolinera para simular el tiempo de atención en cierto intervalo de tiempo
+Programa de simulación del sistema de una gasolinera. Ingresar el tiempo de simulación para observar el comportamiento de los vehículos en el lapso establecido y sus tiempos de llegada y espera
