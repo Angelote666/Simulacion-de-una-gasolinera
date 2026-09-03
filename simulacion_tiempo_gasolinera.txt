@@ -1,0 +1,54 @@
+#Installación de librerias
+!pip install simpy
+!pip install colorama
+#Importacion de librerías
+import simpy, random
+from colorama import Fore, Style
+
+#Tiempo de ejecución
+tiempoSimulacion = float(input("¿Cuánto tiempo desea simular? (en minutos) "))
+
+#Simulación: comportamiento de un solo vehículo
+def vehiculo(env, id_vehiculo, espacio):
+    llegada = env.now
+    print(f"{env.now:.2f} - Vehículo #{id_vehiculo} llega a la gasolinera")
+
+    with espacio.request() as solicitud:
+        yield solicitud
+        espera = env.now - llegada
+
+        print(Fore.GREEN + f"{env.now:.2f} - Vehículo #{id_vehiculo} empieza a usar la gasolinera "
+              f"(esperó {espera:.2f} min)" + Style.RESET_ALL)
+
+        # Tiempo que tarda el llenado de tanque, depende del tipo de vehículo
+        tipo = random.randint(0, 1)
+
+        if tipo == 1:
+            tiempo_llenado = random.uniform(2, 4)
+        else:
+            tiempo_llenado = random.uniform(1, 2)
+
+        yield env.timeout(tiempo_llenado)
+        print(f"{env.now:.2f} - Vehículo #{id_vehiculo} termina de usar la gasolinera "
+              f"(tardó {tiempo_llenado:.2f} min)")
+
+#Generador de vehículos: crea llegadas aleatorias sin límite
+def generador_vehiculos(env, espacio):
+    while True:
+        intervalo = random.uniform(0, 3)
+        yield env.timeout(intervalo)
+
+        id_vehiculo = random.randint(1000, 9999)  # ID aleatorio para cada vehículo
+        env.process(vehiculo(env, id_vehiculo, espacio))
+
+# Creando el entorno
+env = simpy.Environment()
+
+# Definir recursos: 2 espacios en la gasolinera
+espacio = simpy.Resource(env, capacity=2)
+
+# Generar eventos
+env.process(generador_vehiculos(env, espacio))
+
+# Ejecutar simulación
+env.run(until=tiempoSimulacion)
